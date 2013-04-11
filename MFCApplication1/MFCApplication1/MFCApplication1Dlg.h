@@ -7,6 +7,7 @@
 #include "guandao.h"
 #include "mailslot.h"
 #include "copyData.h"
+#include "niming.h"
 // CMFCApplication1Dlg ¶Ô»°¿ò
 class CMFCApplication1Dlg : public CDialogEx
 {
@@ -36,6 +37,7 @@ protected:
 public:
 	guandao guan;
 	mailslot mail;
+	niming ni;
 	copyData cc;
 	afx_msg void OnBnClickedSend();
 	CEdit Content_Text;
@@ -55,6 +57,8 @@ public:
 	CListBox chistroy;
 	afx_msg void OnBnClickedButton1();
 	afx_msg void dclick();
+	afx_msg void OnBnClickedRadio4();
+	CButton radio_niming;
 };
  DWORD WINAPI read(LPVOID lpParameter);
 

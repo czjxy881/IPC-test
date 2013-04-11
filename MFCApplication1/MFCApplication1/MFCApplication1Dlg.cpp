@@ -16,6 +16,7 @@ using namespace std;
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 bool frun; 
+BOOL fchild;
 class CAboutDlg : public CDialog
 {
 public:
@@ -55,6 +56,7 @@ CMFCApplication1Dlg::CMFCApplication1Dlg(CWnd* pParent /*=NULL*/)
 	guan=guandao();
 	mail=mailslot();
 	cc=copyData();
+	ni=niming();
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
@@ -66,6 +68,7 @@ void CMFCApplication1Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT1, cname);
 	DDX_Control(pDX, IDC_CHECK1, runc);
 	DDX_Control(pDX, IDC_LIST1, chistroy);
+	DDX_Control(pDX, IDC_RADIO4, radio_niming);
 }
 
 void recmessage();
@@ -86,6 +89,7 @@ BEGIN_MESSAGE_MAP(CMFCApplication1Dlg, CDialogEx)
 	ON_WM_COPYDATA()
 	ON_BN_CLICKED(IDC_BUTTON1, &CMFCApplication1Dlg::OnBnClickedButton1)
 	ON_LBN_DBLCLK(IDC_LIST1, &CMFCApplication1Dlg::dclick)
+	ON_BN_CLICKED(IDC_RADIO4, &CMFCApplication1Dlg::OnBnClickedRadio4)
 END_MESSAGE_MAP()
 
 
@@ -113,6 +117,13 @@ BOOL CMFCApplication1Dlg::OnInitDialog()
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
+	}
+	HANDLE m=GetStdHandle(STD_INPUT_HANDLE);
+	fchild=(m!=0);
+	if(fchild)
+	{
+		radio_niming.SetCheck(4);
+		OnBnClickedRadio4();
 	}
 
 	// 设置此对话框的图标。当应用程序主窗口不是对话框时，框架将自动
@@ -186,7 +197,7 @@ void CMFCApplication1Dlg::OnBnClickedSend()
 	SYSTEMTIME tt;
 	GetLocalTime(&tt);
 	wsprintf(pid+strlen(pid)," %02d:%02d",tt.wHour,tt.wMinute);
-	content="pid-"+CString(pid)+": "+content;
+	content="pid-"+CString(pid)+" :"+content;
 	switch (now)
 	{
 		case 1:
@@ -199,12 +210,15 @@ void CMFCApplication1Dlg::OnBnClickedSend()
 			cip.GetWindowTextA(name);
 			t=cc.send(name,content);
 			break;
+		case 4:
+			t=ni.send(content);
+			break;
 		default:
 			MessageBox("请选择类型！","错误",MB_ICONERROR);
 			return;
 	}
 	if(!t)return;
-	chistroy.InsertString(-1,"send:"+content);
+	chistroy.InsertString(-1,"send-"+content);
 	Content_Text.SetWindowTextA("");
 }
 
@@ -220,13 +234,19 @@ void CMFCApplication1Dlg::OnBnClickedRecive()
 		case 2:
 			content=guan.read();
 			break;
+		case 4:
+			content=ni.recv();
+			break;
 		default:
 			MessageBox("请选择类型！","错误",MB_ICONERROR);
 			return;
 	}
-	if(content!="")chistroy.InsertString(-1,"Recv:"+content);
+	if(content!="")chistroy.InsertString(-1,"Recv "+content);
 
 }
+
+
+//主动定时接受消息，避免窗口因为同名而接受不到消息
 DWORD WINAPI read(LPVOID lpParameter)
 {
 	CMFCApplication1Dlg *p=(CMFCApplication1Dlg*)lpParameter;
@@ -237,11 +257,12 @@ DWORD WINAPI read(LPVOID lpParameter)
 		{
 			if(!frun)return 0;
 			Sleep(1000);
-			if(!(p->GetDlgItem(IDC_del)->IsWindowEnabled()))continue;
+			if(now!=4&&!(p->GetDlgItem(IDC_del)->IsWindowEnabled()))continue;
 			switch (now)
 			{
 			case 1:  hh=p->mail.have();break;
 			case 2: hh=p->guan.have();break;
+			case 4: hh=p->ni.have();break;
 			default:
 			break;
 			}
@@ -250,7 +271,12 @@ DWORD WINAPI read(LPVOID lpParameter)
 	}
 	return 0;
 }
-
+//自动接受消息
+void CMFCApplication1Dlg::OnBnClickedCheck1()
+{
+	frun=!frun;
+	if(frun)CreateThread(NULL,0,read,this,0,NULL);
+}
 
 //创立服务端
 void CMFCApplication1Dlg::OnBnClickedbuild()
@@ -267,7 +293,10 @@ void CMFCApplication1Dlg::OnBnClickedbuild()
 	case 2:
 		t=guan.create(serve,name);break;
 	case 3:
-		this->SetWindowTextA(name);
+		this->SetWindowTextA(name);break;
+	case 4:
+		t=ni.build();
+		break;
 	default:
 		break;
 	}
@@ -276,6 +305,7 @@ void CMFCApplication1Dlg::OnBnClickedbuild()
 		GetDlgItem(IDC_build)->EnableWindow(FALSE);
 		GetDlgItem(IDC_connect)->EnableWindow(FALSE);
 		GetDlgItem(IDC_del)->EnableWindow(TRUE);
+		if(now==1)GetDlgItem(IDC_Send)->EnableWindow(FALSE);
 	}
 }
 //创立发送端
@@ -292,6 +322,8 @@ void CMFCApplication1Dlg::OnBnClickedconnect()
 	case 2:
 		t=guan.connect(serve,name);break;
 	default:
+		ni.connect();
+		t=1;
 		break;
 	}
 	if(t)
@@ -299,6 +331,7 @@ void CMFCApplication1Dlg::OnBnClickedconnect()
 		GetDlgItem(IDC_connect)->EnableWindow(FALSE);
 		GetDlgItem(IDC_build)->EnableWindow(FALSE);
 		GetDlgItem(IDC_del)->EnableWindow(TRUE);
+		if(now==1)GetDlgItem(IDC_Recive)->EnableWindow(FALSE);
 	}
 }
 //断开链接
@@ -319,14 +352,9 @@ void CMFCApplication1Dlg::OnBnClickeddel()
 		GetDlgItem(IDC_build)->EnableWindow(TRUE);
 		GetDlgItem(IDC_connect)->EnableWindow(TRUE);
 		GetDlgItem(IDC_del)->EnableWindow(FALSE);
+		GetDlgItem(IDC_Recive)->EnableWindow(TRUE);
+		GetDlgItem(IDC_Send)->EnableWindow(TRUE);
 	}
-}
-
-
-void CMFCApplication1Dlg::OnBnClickedCheck1()
-{
-	frun=!frun;
-	if(frun)CreateThread(NULL,0,read,this,0,NULL);
 }
 
 
@@ -339,7 +367,7 @@ BOOL CMFCApplication1Dlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct
 		DWORD dwLength = (DWORD)(pCopyDataStruct->cbData);
 		TCHAR szRecvText[1024] = {0};
 		memcpy(szRecvText, pszText, dwLength);
-		chistroy.InsertString(-1,"Recv:"+CString(szRecvText));
+		chistroy.InsertString(-1,"Recv "+CString(szRecvText));
 	}
 	return CDialog::OnCopyData(pWnd, pCopyDataStruct);
 }
@@ -367,6 +395,7 @@ void CMFCApplication1Dlg::OnBnClickedRadio1()
 {
 	now=1;
 	GetDlgItem(IDC_STATIC)->SetWindowTextA("发送目标名:(*为全局,.为本机)");
+	GetDlgItem(IDC_STATICp)->SetWindowTextA("邮槽名:");
 	cip.ShowWindow(SW_SHOW);
 	cip.SetWindowTextA("*");
 	cname.ShowWindow(SW_SHOW);
@@ -420,4 +449,31 @@ void CMFCApplication1Dlg::OnBnClickedRadio3()
 	runc.ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_Recive)->ShowWindow(SW_HIDE);
 	frun=0;
+}
+
+//匿名管道
+void CMFCApplication1Dlg::OnBnClickedRadio4()
+{
+	now=4;
+	GetDlgItem(IDC_STATIC)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_STATICp)->ShowWindow(SW_HIDE);
+	cip.ShowWindow(SW_HIDE);
+	cname.ShowWindow(SW_HIDE);
+	if(fchild)
+	{
+		GetDlgItem(IDC_build)->ShowWindow(SW_HIDE);
+		ni.connect();
+	}
+	else
+	{
+		GetDlgItem(IDC_build)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_build)->SetWindowTextA("创建子进程");
+	}
+	GetDlgItem(IDC_connect)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_del)->ShowWindow(SW_HIDE);
+	runc.ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_Recive)->ShowWindow(SW_SHOW);
+	runc.ShowWindow(SW_SHOW);
+	frun=0;
+	runc.SetCheck(false);
 }
