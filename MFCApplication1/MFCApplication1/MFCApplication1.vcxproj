@@ -107,6 +107,7 @@
     <ClInclude Include="MFCApplication1Dlg.h" />
     <ClInclude Include="niming.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="share.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -117,6 +118,7 @@
     <ClCompile Include="MFCApplication1.cpp" />
     <ClCompile Include="MFCApplication1Dlg.cpp" />
     <ClCompile Include="niming.cpp" />
+    <ClCompile Include="share.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

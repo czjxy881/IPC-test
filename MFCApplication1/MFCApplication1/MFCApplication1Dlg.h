@@ -8,6 +8,7 @@
 #include "mailslot.h"
 #include "copyData.h"
 #include "niming.h"
+#include "share.h"
 // CMFCApplication1Dlg ¶Ô»°¿ò
 class CMFCApplication1Dlg : public CDialogEx
 {
@@ -35,10 +36,11 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	guandao guan;
 	mailslot mail;
+	guandao guan;
 	niming ni;
 	copyData cc;
+	share sh;
 	afx_msg void OnBnClickedSend();
 	CEdit Content_Text;
 	afx_msg void OnBnClickedRecive();
@@ -59,6 +61,8 @@ public:
 	afx_msg void dclick();
 	afx_msg void OnBnClickedRadio4();
 	CButton radio_niming;
+	afx_msg void OnBnClickedRadio5();
+	afx_msg void OnOK();
 };
  DWORD WINAPI read(LPVOID lpParameter);
 

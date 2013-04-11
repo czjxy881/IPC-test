@@ -45,6 +45,9 @@
     <ClInclude Include="niming.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="share.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCApplication1.cpp">
@@ -66,6 +69,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="niming.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="share.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
