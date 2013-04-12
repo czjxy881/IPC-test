@@ -35,6 +35,8 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+
+	virtual void OnOK();
 public:
 	mailslot mail;
 	guandao guan;
@@ -62,8 +64,8 @@ public:
 	afx_msg void OnBnClickedRadio4();
 	CButton radio_niming;
 	afx_msg void OnBnClickedRadio5();
-	afx_msg void OnOK();
-	afx_msg void OnKeyDown();
+//	afx_msg void OnOK();
+	afx_msg BOOL PreTranslateMessage(MSG *p);
 };
  DWORD WINAPI read(LPVOID lpParameter);
 

@@ -231,6 +231,18 @@ void CMFCApplication1Dlg::OnOK()
 	OnBnClickedSend();
 }
 
+//按任意字母切换到输入框
+BOOL CMFCApplication1Dlg::PreTranslateMessage(MSG *p)
+{
+	int m=p->wParam;
+	if(m>'A'&&m<'Z')
+	{
+		if(GetFocus()!=Content_Text.GetHandle())//判断是否以有焦点，不然会卡死
+			 Content_Text.SetFocus();
+	}
+	return CDialog::PreTranslateMessage(p);
+}
+
 void CMFCApplication1Dlg::OnBnClickedRecive()
 {
 	CString content;
