@@ -57,5 +57,15 @@ void niming::connect()
 int niming::have()
 {
 	bool s=cin.eof();
+	DWORD d;
+	int pid;
+	char ss[1024];
+	if(!s)
+	{
+		ReadFile(hRead , ss ,1024,&d,NULL);
+		sscanf(ss,"pid-%d",&pid);
+		if(pid==getpid())s=1;
+		WriteFile(hWrite,ss,1024,&d,NULL);
+	}
 	return !s;
 }

@@ -225,6 +225,7 @@ void CMFCApplication1Dlg::OnBnClickedSend()
 	chistroy.InsertString(-1,"send "+content);
 	Content_Text.SetWindowTextA("");
 }
+//»Ø³µ¼ü·¢ËÍ
 void CMFCApplication1Dlg::OnOK()
 {
 	OnBnClickedSend();

@@ -63,6 +63,7 @@ public:
 	CButton radio_niming;
 	afx_msg void OnBnClickedRadio5();
 	afx_msg void OnOK();
+	afx_msg void OnKeyDown();
 };
  DWORD WINAPI read(LPVOID lpParameter);
 
